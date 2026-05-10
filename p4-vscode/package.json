@@ -1,0 +1,104 @@
+{
+  "name": "p4-vscode",
+  "displayName": "P4 Language Support",
+  "description": "P4-16 language support via p4lsp-server",
+  "version": "0.1.1",
+  "publisher": "p4lsp",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "keywords": [
+    "P4",
+    "P4-16",
+    "programming language",
+    "language server",
+    "networking",
+    "SDN",
+    "data plane"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/marshal/p4lsp"
+  },
+  "activationEvents": [
+    "onLanguage:p4"
+  ],
+  "main": "./client/out/extension",
+  "contributes": {
+    "languages": [
+      {
+        "id": "p4",
+        "aliases": [
+          "P4",
+          "p4"
+        ],
+        "extensions": [
+          ".p4"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "p4",
+        "scopeName": "source.p4",
+        "path": "./syntaxes/p4.tmLanguage.json"
+      }
+    ],
+    "configuration": {
+      "title": "P4 Language Server",
+      "properties": {
+        "p4lsp.serverPath": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Path to p4lsp-server executable. If null, the bundled binary is used."
+        },
+        "p4lsp.includePaths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Additional include paths for P4 #include resolution."
+        },
+        "p4lsp.enableLogging": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable LSP request/response logging to the Output panel."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -b",
+    "watch": "tsc -b -w",
+    "test": "tsc -b && xvfb-run -a node ./client/out/test/runTest.js",
+    "test:headless": "tsc -b && xvfb-run -a node ./client/out/test/runTest.js",
+    "bump": "npm --no-git-tag-version version patch",
+    "package": "npm run bump && rm -f p4-vscode-*.vsix && vsce package",
+    "vscode:prepublish": "npm run compile"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/test-electron": "^2.5.2",
+    "glob": "^10.5.0",
+    "mocha": "^11.3.0",
+    "typescript": "^5.3.0"
+  },
+  "overrides": {
+    "serialize-javascript": "^7.0.5",
+    "debug": "^4.3.7",
+    "diff": "^8.0.3",
+    "js-yaml": "^4.1.0",
+    "minimatch": "^10.0.1"
+  }
+}

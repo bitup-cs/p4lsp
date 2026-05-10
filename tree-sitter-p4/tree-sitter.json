@@ -1,0 +1,28 @@
+{
+  "grammars": [
+    {
+      "name": "p4",
+      "scope": "source.p4",
+      "file-types": ["p4"],
+      "injection-regex": "^(p4)$",
+      "highlights": "queries/highlights.scm"
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": "P4-16 grammar for tree-sitter",
+    "authors": [{"name": "Marshal"}],
+    "links": {"repository": "https://github.com/marshal/tree-sitter-p4"}
+  },
+  "bindings": {
+    "c": true,
+    "go": true,
+    "java": false,
+    "node": true,
+    "python": true,
+    "rust": true,
+    "swift": false,
+    "zig": false
+  }
+}

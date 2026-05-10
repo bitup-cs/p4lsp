@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "methods": {
+    "header": [
+      { "name": "isValid", "return": "bool", "params": [] },
+      { "name": "setValid", "return": "void", "params": [] },
+      { "name": "setInvalid", "return": "void", "params": [] }
+    ],
+    "header_union": [
+      { "name": "isValid", "return": "bool", "params": [] },
+      { "name": "setValid", "return": "void", "params": [] },
+      { "name": "setInvalid", "return": "void", "params": [] }
+    ],
+    "packet_in": [
+      { "name": "extract", "return": "void", "params": [{ "name": "hdr", "type": "T", "out": true }], "generic": true },
+      { "name": "extract", "return": "void", "params": [{ "name": "hdr", "type": "T", "out": true }, { "name": "variableFieldSizeInBits", "type": "bit<32>", "in": true }], "generic": true },
+      { "name": "lookahead", "return": "T", "params": [], "generic": true },
+      { "name": "advance", "return": "void", "params": [{ "name": "sizeInBits", "type": "bit<32>", "in": true }] },
+      { "name": "length", "return": "bit<32>", "params": [] }
+    ],
+    "packet_out": [
+      { "name": "emit", "return": "void", "params": [{ "name": "hdr", "type": "T", "in": true }], "generic": true }
+    ],
+    "table": [
+      { "name": "apply", "return": "void", "params": [] }
+    ]
+  },
+  "functions": [
+    { "name": "digest", "return": "void", "params": [{ "name": "receiver", "type": "bit<32>" }, { "name": "data", "type": "T" }], "generic": true },
+    { "name": "markToDrop", "return": "void", "params": [] },
+    { "name": "hash", "return": "void", "params": [{ "name": "out", "type": "T" }, { "name": "algo", "type": "HashAlgorithm" }, { "name": "base", "type": "bit<32>" }, { "name": "data", "type": "T2" }, { "name": "max", "type": "bit<32>" }], "generic": true },
+    { "name": "random", "return": "bit<32>", "params": [{ "name": "out", "type": "bit<32>" }, { "name": "lo", "type": "bit<32>" }, { "name": "hi", "type": "bit<32>" }] },
+    { "name": "verify", "return": "void", "params": [{ "name": "condition", "type": "bool" }, { "name": "err", "type": "error" }] },
+    { "name": "verify_checksum", "return": "void", "params": [{ "name": "condition", "type": "bool" }, { "name": "data", "type": "T" }, { "name": "checksum", "type": "bit<16>" }, { "name": "algo", "type": "HashAlgorithm" }], "generic": true },
+    { "name": "verify_checksum_with_payload", "return": "void", "params": [{ "name": "condition", "type": "bool" }, { "name": "data", "type": "T" }, { "name": "checksum", "type": "bit<16>" }, { "name": "algo", "type": "HashAlgorithm" }], "generic": true },
+    { "name": "update_checksum", "return": "void", "params": [{ "name": "condition", "type": "bool" }, { "name": "data", "type": "T" }, { "name": "checksum", "type": "bit<16>" }, { "name": "algo", "type": "HashAlgorithm" }], "generic": true },
+    { "name": "update_checksum_with_payload", "return": "void", "params": [{ "name": "condition", "type": "bool" }, { "name": "data", "type": "T" }, { "name": "checksum", "type": "bit<16>" }, { "name": "algo", "type": "HashAlgorithm" }], "generic": true },
+    { "name": "assert", "return": "void", "params": [{ "name": "condition", "type": "bool" }] },
+    { "name": "assume", "return": "void", "params": [{ "name": "condition", "type": "bool" }] },
+    { "name": "log_msg", "return": "void", "params": [{ "name": "msg", "type": "string" }] },
+    { "name": "log_msg", "return": "void", "params": [{ "name": "msg", "type": "string" }, { "name": "data", "type": "T" }], "generic": true }
+  ]
+}

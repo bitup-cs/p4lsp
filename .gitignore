@@ -1,0 +1,6 @@
+/target
+/.vscode-test
+/node_modules
+*.vsix
+*.exe
+.DS_Store

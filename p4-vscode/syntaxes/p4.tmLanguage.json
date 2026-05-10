@@ -1,0 +1,130 @@
+{
+  "scopeName": "source.p4",
+  "name": "P4",
+  "fileTypes": [".p4"],
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#keywords" },
+    { "include": "#types" },
+    { "include": "#constants" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#operators" },
+    { "include": "#preprocessor" },
+    { "include": "#annotations" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.p4",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.p4",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.p4",
+          "match": "\\b(if|else|switch|return|transition|state|apply)\\b"
+        },
+        {
+          "name": "keyword.declaration.p4",
+          "match": "\\b(const|enum|header|header_union|struct|extern|parser|control|package|action|table|function|typedef|type)\\b"
+        },
+        {
+          "name": "keyword.other.p4",
+          "match": "\\b(in|out|inout|varbit|bit|int|bool|void|error|match_kind|actions|key|size|default_action|entries|const|abstract)\\b"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "support.type.p4",
+          "match": "\\b(bit|int|varbit|bool|void|string|error)\\b"
+        },
+        {
+          "name": "support.type.p4",
+          "match": "\\b(bit|int)\\s*<\\s*\\d+\\s*>"
+        }
+      ]
+    },
+    "constants": {
+      "patterns": [
+        {
+          "name": "constant.language.p4",
+          "match": "\\b(true|false|accept|reject|NoAction)\\b"
+        },
+        {
+          "name": "constant.numeric.p4",
+          "match": "\\b[0-9]+\\b"
+        }
+      ]
+    },
+    "strings": {
+      "name": "string.quoted.double.p4",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.p4",
+          "match": "\\\\."
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.hex.p4",
+          "match": "\\b0[xX][0-9a-fA-F_]+\\b"
+        },
+        {
+          "name": "constant.numeric.binary.p4",
+          "match": "\\b0[bB][01_]+\\b"
+        },
+        {
+          "name": "constant.numeric.decimal.p4",
+          "match": "\\b[0-9]+(w|s)?\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.p4",
+          "match": "(\\+\\+|==|!=|<=|>=|\\&\\&|\\|\\||<<|>>|\\+\\||-\\|)"
+        },
+        {
+          "name": "keyword.operator.p4",
+          "match": "(\\+|-|\\*|/|%|<|>|\\&|\\||\\^|~|!|\\?=)"
+        }
+      ]
+    },
+    "preprocessor": {
+      "patterns": [
+        {
+          "name": "meta.preprocessor.p4",
+          "match": "^\\s*#(include|define|ifdef|ifndef|endif|if|else|elif|undef|pragma)\\b"
+        },
+        {
+          "name": "string.quoted.other.p4",
+          "match": "<[^>]+>"
+        }
+      ]
+    },
+    "annotations": {
+      "patterns": [
+        {
+          "name": "storage.modifier.p4",
+          "match": "@\\w+"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "name": "tree-sitter-p4",
+  "version": "0.1.0",
+  "description": "Tree-sitter grammar for P4-16",
+  "main": "bindings/node",
+  "types": "bindings/node",
+  "keywords": [
+    "tree-sitter",
+    "p4"
+  ],
+  "files": [
+    "grammar.js",
+    "binding.gyp",
+    "prebuilds/**",
+    "bindings/node/*",
+    "queries/*",
+    "src/**"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "generate": "tree-sitter generate",
+    "test": "tree-sitter test",
+    "parse": "tree-sitter parse",
+    "install": "node-gyp-build",
+    "prebuildify": "prebuildify --napi --strip"
+  },
+  "devDependencies": {
+    "tree-sitter-cli": "^0.22.0",
+    "prebuildify": "^6.0.0"
+  },
+  "dependencies": {
+    "node-gyp-build": "^4.8.0"
+  },
+  "peerDependencies": {
+    "tree-sitter": "^0.21.0"
+  },
+  "peerDependenciesMeta": {
+    "tree_sitter": {
+      "optional": true
+    }
+  },
+  "tree-sitter": [
+    {
+      "scope": "source.p4",
+      "injection-regex": "^p4$"
+    }
+  ]
+}

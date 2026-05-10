@@ -1,0 +1,49 @@
+name: Test
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  server-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cd p4lsp-server && cargo test --lib
+
+  vscode-integration-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgtk-3-0 libgbm1 libnss3 libasound2t64 libxss1
+      - run: cd p4-vscode && npm install
+      - run: cd p4-vscode && xvfb-run -a npm test
+
+  build-release:
+    runs-on: ubuntu-latest
+    needs: [server-test, vscode-integration-test]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cd p4lsp-server && cargo build --release
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: |
+          cd p4-vscode
+          npm install
+          npm run compile
+          cp ../target/release/p4lsp-server server/
+          npx vsce package --no-dependencies
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p4-vscode
+          path: p4-vscode/p4-vscode-*.vsix
