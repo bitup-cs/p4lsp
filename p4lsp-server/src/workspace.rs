@@ -970,8 +970,9 @@ control D() {
     /// 测试 10：使用真实 test.p4 fixture 验证 index_document + resolve_symbol('ethernet_t')。
     #[test]
     fn test_fixture_ethernet_t() {
-        let fixture_path = "/root/.openclaw/workspace/p4lsp/p4-vscode/client/src/test/fixtures/test.p4";
-        let source = std::fs::read_to_string(fixture_path)
+        let fixture_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../p4-vscode/client/src/test/fixtures/test.p4");
+        let source = std::fs::read_to_string(&fixture_path)
             .expect("fixture file should exist and be readable");
         let tree = parse_p4(&source);
         let index = WorkspaceIndex::new();
