@@ -124,10 +124,10 @@ npm run test:headless   # Xvfb 无头环境
 
 | 文档 | 内容 |
 |------|------|
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 系统架构、模块职责、数据流、并发模型 |
+| [docs/STATUS.md](docs/STATUS.md) | 各功能实现状态矩阵（LSP / 客户端 / 基础设施 / 测试） |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | 按 Phase 排序的开发路线图 |
 | [docs/gap-analysis.md](docs/gap-analysis.md) | P4-16 spec v1.2.5 vs 当前实现的完整差距分析 |
-| [docs/review-2026-05-10.md](docs/review-2026-05-10.md) | 多文件搜索路径 / 嵌套结构 / 客户端交互深度评审 |
-| [docs/vscode-redesign-plan.md](docs/vscode-redesign-plan.md) | VS Code 插件三阶段重构计划 |
-| [docs/tree-sitter-audit.md](docs/tree-sitter-audit.md) | Tree-sitter P4 Grammar 审计与修复记录 |
 | [p4-vscode/CHANGELOG.md](p4-vscode/CHANGELOG.md) | 版本变更记录 |
 | [p4-vscode/README.md](p4-vscode/README.md) | VS Code 插件详细说明 |
 
