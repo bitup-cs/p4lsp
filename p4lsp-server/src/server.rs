@@ -101,6 +101,18 @@ impl Backend {
     }
 }
 
+fn parse_include_paths(opts: &serde_json::Value) -> Vec<String> {
+    let mut result = Vec::new();
+    if let Some(paths) = opts.get("includePaths").and_then(|v| v.as_array()) {
+        for p in paths {
+            if let Some(s) = p.as_str() {
+                result.push(s.to_string());
+            }
+        }
+    }
+    result
+}
+
 #[tower_lsp::async_trait]
 impl LanguageServer for Backend {
     async fn initialize(&self, params: InitializeParams) -> Result<InitializeResult> {
@@ -109,17 +121,13 @@ impl LanguageServer for Backend {
             *wf = folders;
         }
 
-        // 读取 initializationOptions 中的 includePaths
         if let Some(opts) = params.initialization_options {
-            if let Some(paths) = opts.get("includePaths").and_then(|v| v.as_array()) {
+            let paths = parse_include_paths(&opts);
+            if !paths.is_empty() {
                 let paths_clone = {
                     let mut include_paths = self.include_paths.lock().unwrap();
                     include_paths.clear();
-                    for p in paths {
-                        if let Some(s) = p.as_str() {
-                            include_paths.push(s.to_string());
-                        }
-                    }
+                    include_paths.extend(paths);
                     include_paths.clone()
                 }; // MutexGuard 在此释放
                 self.client
@@ -540,6 +548,19 @@ impl LanguageServer for Backend {
         }
     }
 
+    async fn symbol(
+        &self,
+        params: WorkspaceSymbolParams,
+    ) -> Result<Option<Vec<SymbolInformation>>> {
+        let query = params.query.to_lowercase();
+        let symbols = build_workspace_symbols(&query, &self.workspace_index);
+        if symbols.is_empty() {
+            Ok(None)
+        } else {
+            Ok(Some(symbols))
+        }
+    }
+
     async fn document_symbol(
         &self,
         params: DocumentSymbolParams,
@@ -589,6 +610,34 @@ impl LanguageServer for Backend {
         }
         Ok(None)
     }
+}
+
+fn build_workspace_symbols(
+    query: &str,
+    workspace_index: &WorkspaceIndex,
+) -> Vec<SymbolInformation> {
+    let mut symbols = Vec::new();
+    for entry in workspace_index.files.iter() {
+        let file_uri = entry.key().clone();
+        let fi = entry.value();
+        for sym in &fi.symbols {
+            if !query.is_empty() && !sym.name.to_lowercase().contains(query) {
+                continue;
+            }
+            symbols.push(SymbolInformation {
+                name: sym.name.clone(),
+                kind: sym.kind,
+                tags: None,
+                deprecated: None,
+                location: Location {
+                    uri: file_uri.clone(),
+                    range: sym.to_lsp_range(),
+                },
+                container_name: None,
+            });
+        }
+    }
+    symbols
 }
 
 fn word_at_pos(source: &str, pos: Position) -> Option<String> {
@@ -700,5 +749,55 @@ mod tests {
             .collect();
         assert!(names.contains(&"top.p4".to_string()));
         assert!(names.contains(&"nested.p4".to_string()));
+    }
+
+    #[test]
+    fn test_build_workspace_symbols_basic() {
+        let index = WorkspaceIndex::new();
+        let uri = Url::parse("file:///test.p4").unwrap();
+        let tree = parse_p4("struct ethernet_t { bit<48> dst; }");
+        index.index_document(&uri, &tree, "struct ethernet_t { bit<48> dst; }");
+
+        let symbols = build_workspace_symbols("", &index);
+        assert!(!symbols.is_empty());
+        assert!(symbols.iter().any(|s| s.name == "ethernet_t"));
+    }
+
+    #[test]
+    fn test_build_workspace_symbols_filter() {
+        let index = WorkspaceIndex::new();
+        let uri = Url::parse("file:///test.p4").unwrap();
+        let tree = parse_p4("struct ethernet_t { bit<48> dst; } header ipv4_t { }");
+        index.index_document(&uri, &tree, "struct ethernet_t { bit<48> dst; } header ipv4_t { }");
+
+        let all = build_workspace_symbols("", &index);
+        assert_eq!(all.len(), 2);
+
+        let filtered = build_workspace_symbols("ipv4", &index);
+        assert_eq!(filtered.len(), 1);
+        assert_eq!(filtered[0].name, "ipv4_t");
+    }
+
+    #[test]
+    fn test_parse_include_paths_basic() {
+        let opts = serde_json::json!({
+            "includePaths": ["/usr/share/p4", "./include"]
+        });
+        let paths = parse_include_paths(&opts);
+        assert_eq!(paths, vec!["/usr/share/p4", "./include"]);
+    }
+
+    #[test]
+    fn test_parse_include_paths_empty() {
+        let opts = serde_json::json!({});
+        let paths = parse_include_paths(&opts);
+        assert!(paths.is_empty());
+    }
+
+    #[test]
+    fn test_parse_include_paths_missing() {
+        let opts = serde_json::json!({ "otherKey": "value" });
+        let paths = parse_include_paths(&opts);
+        assert!(paths.is_empty());
     }
 }
