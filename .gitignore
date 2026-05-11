@@ -1,6 +1,7 @@
 /target
 /.vscode-test
 /node_modules
+p4-vscode/node_modules/
 *.vsix
 *.exe
 .DS_Store

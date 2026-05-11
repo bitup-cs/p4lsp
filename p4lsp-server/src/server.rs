@@ -19,6 +19,7 @@ pub struct Backend {
     documents: DashMap<Url, Document>,
     workspace_index: WorkspaceIndex,
     workspace_folders: std::sync::Mutex<Vec<WorkspaceFolder>>,
+    include_paths: std::sync::Mutex<Vec<String>>,
 }
 
 impl Backend {
@@ -28,6 +29,7 @@ impl Backend {
             documents: DashMap::new(),
             workspace_index: WorkspaceIndex::new(),
             workspace_folders: std::sync::Mutex::new(Vec::new()),
+            include_paths: std::sync::Mutex::new(Vec::new()),
         }
     }
 
@@ -107,6 +109,28 @@ impl LanguageServer for Backend {
             *wf = folders;
         }
 
+        // 读取 initializationOptions 中的 includePaths
+        if let Some(opts) = params.initialization_options {
+            if let Some(paths) = opts.get("includePaths").and_then(|v| v.as_array()) {
+                let paths_clone = {
+                    let mut include_paths = self.include_paths.lock().unwrap();
+                    include_paths.clear();
+                    for p in paths {
+                        if let Some(s) = p.as_str() {
+                            include_paths.push(s.to_string());
+                        }
+                    }
+                    include_paths.clone()
+                }; // MutexGuard 在此释放
+                self.client
+                    .log_message(
+                        MessageType::INFO,
+                        format!("p4lsp: includePaths = {:?}", paths_clone),
+                    )
+                    .await;
+            }
+        }
+
         Ok(InitializeResult {
             capabilities: ServerCapabilities {
                 text_document_sync: Some(TextDocumentSyncCapability::Options(
@@ -134,6 +158,7 @@ impl LanguageServer for Backend {
                     work_done_progress_options: WorkDoneProgressOptions::default(),
                 }),
                 rename_provider: Some(OneOf::Left(true)),
+                workspace_symbol_provider: Some(OneOf::Left(true)),
                 ..Default::default()
             },
             ..Default::default()
@@ -488,7 +513,26 @@ impl LanguageServer for Backend {
             None => return Ok(None),
         };
 
-        let locations = self.find_references_in_file(&uri, &word);
+        let mut locations = self.find_references_in_file(&uri, &word);
+
+        // 跨文件搜索：遍历所有已索引的文件
+        for entry in self.workspace_index.files.iter() {
+            let file_uri = entry.key().clone();
+            if file_uri == uri {
+                continue;
+            }
+            let fi = entry.value();
+            if let Some(ref file_tree) = fi.tree {
+                crate::references::collect_reference_nodes(
+                    file_tree.root_node(),
+                    &fi.source,
+                    &word,
+                    &file_uri,
+                    &mut locations,
+                );
+            }
+        }
+
         if locations.is_empty() {
             Ok(None)
         } else {

@@ -73,6 +73,8 @@ function startClient(context: vscode.ExtensionContext) {
       }
     : undefined;
 
+  const includePaths = config.get<string[]>("includePaths") || [];
+
   const clientOptions: LanguageClientOptions = {
     documentSelector: [
       { scheme: "file", language: "p4" },
@@ -83,6 +85,9 @@ function startClient(context: vscode.ExtensionContext) {
     },
     middleware,
     outputChannel,
+    initializationOptions: {
+      includePaths,
+    },
   };
 
   client = new LanguageClient("p4lsp", "P4 Language Server", serverOptions, clientOptions);

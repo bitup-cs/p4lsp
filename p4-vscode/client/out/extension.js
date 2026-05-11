@@ -94,6 +94,7 @@ function startClient(context) {
             },
         }
         : undefined;
+    const includePaths = config.get("includePaths") || [];
     const clientOptions = {
         documentSelector: [
             { scheme: "file", language: "p4" },
@@ -104,6 +105,9 @@ function startClient(context) {
         },
         middleware,
         outputChannel,
+        initializationOptions: {
+            includePaths,
+        },
     };
     client = new node_1.LanguageClient("p4lsp", "P4 Language Server", serverOptions, clientOptions);
     client.onDidChangeState((e) => {

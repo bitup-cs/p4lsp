@@ -128,10 +128,37 @@ fn collect_matching_recursive(node: Node, source: &str, name: &str, out: &mut Ve
 /// Collect matching nodes only within a scope boundary (for local symbols).
 fn collect_matching_in_scope(boundary: Node, source: &str, name: &str) -> Vec<Range> {
     let mut ranges = Vec::new();
-    collect_matching_recursive(boundary, source, name, &mut ranges);
+    // When boundary is not an action itself, skip action/annotated_action
+    // subtrees to avoid renaming unrelated local variables in actions.
+    let skip_actions = boundary.kind() != "action" && boundary.kind() != "annotated_action";
+    collect_matching_in_scope_recursive(boundary, source, name, skip_actions, &mut ranges);
     ranges.sort_by_key(|r| (r.start.line, r.start.character));
     ranges.dedup_by(|a, b| a.start == b.start && a.end == b.end);
     ranges
+}
+
+fn collect_matching_in_scope_recursive(
+    node: Node,
+    source: &str,
+    name: &str,
+    skip_actions: bool,
+    out: &mut Vec<Range>,
+) {
+    let kind = node.kind();
+    if skip_actions && (kind == "action" || kind == "annotated_action") {
+        return;
+    }
+    if kind == "identifier" || kind == "type_identifier" || kind == "method_identifier" {
+        let text = &source[node.start_byte()..node.end_byte()];
+        if text == name {
+            out.push(ts_range_to_lsp(node));
+        }
+    }
+    for i in 0..node.child_count() {
+        if let Some(child) = node.child(i) {
+            collect_matching_in_scope_recursive(child, source, name, skip_actions, out);
+        }
+    }
 }
 
 /// Find the nearest scope boundary node for a local symbol.
@@ -153,7 +180,8 @@ fn find_scope_boundary(tree: &Tree, pos: Position) -> Option<Node<'_>> {
             | "block_statement"
             | "state"
             | "for_statement"
-            | "conditional" => return Some(n),
+            | "conditional"
+            | "control_body" => return Some(n),
             _ => {}
         }
         current = n.parent();
@@ -444,5 +472,44 @@ control MyControl() {
         let ranges = targets.edits.get(&uri).unwrap();
         // Expect: action definition + reference in table actions list
         assert_eq!(ranges.len(), 2, "should rename drop definition and table reference");
+    }
+
+    /// Test 8: Rename a local variable inside a control apply block.
+    /// The variable `x` is declared in apply and used there.
+    /// It should NOT affect an action with the same local variable name.
+    #[test]
+    fn test_rename_apply_local_variable() {
+        let source = r#"
+control MyControl() {
+    action drop() {
+        bit<16> x = 1;
+    }
+    apply {
+        bit<32> x = 2;
+        x = 3;
+    }
+}
+"#;
+        let tree = parse_p4(source);
+        let index = WorkspaceIndex::new();
+        let uri = Url::parse("file:///test.p4").unwrap();
+        index.index_document(&uri, &tree, source);
+
+        // Cursor on the `x` declaration inside apply (line 6, char ~16)
+        let pos = Position { line: 6, character: 16 };
+        let targets = prepare_rename(&uri, pos, &tree, source, &index).expect("should find rename targets");
+
+        assert!(targets.is_local, "apply-local x should be a local symbol");
+        assert_eq!(targets.name, "x");
+
+        let ranges = targets.edits.get(&uri).expect("should have edits in current file");
+        // Should rename 2 occurrences: declaration + assignment, both inside apply block
+        assert_eq!(ranges.len(), 2, "should rename only 2 occurrences of x in apply block");
+
+        let lines: Vec<u32> = ranges.iter().map(|r| r.start.line).collect();
+        assert!(lines.contains(&6), "should include declaration on line 6");
+        assert!(lines.contains(&7), "should include usage on line 7");
+        // Must NOT include line 3 (action drop's x)
+        assert!(!lines.contains(&3), "must not rename action drop's x on line 3");
     }
 }

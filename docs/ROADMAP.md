@@ -6,14 +6,14 @@
 
 ## Phase 1: 补全基础能力（进行中）
 
-| 任务 | 优先级 | 目标 | 阻塞项 |
-|------|--------|------|--------|
-| **Workspace Symbol** | P1 | 全局符号搜索（Ctrl+T） | 接入 `workspace_index.resolve_symbol` |
-| **Find References 跨文件** | P1 | 从单文件扩展到全局索引 | workspace 索引需支持反向引用链 |
-| **Rename 局部变量完善** | P1 | apply 块内局部变量重命名 | 局部作用域遍历精度 |
+| 任务 | 优先级 | 目标 | 状态 |
+|------|--------|------|------|
+| **Workspace Symbol** | P1 | 全局符号搜索（Ctrl+T） | ✅ 完成 |
+| **Find References 跨文件** | P1 | 从单文件扩展到全局索引 | ✅ 完成 |
+| **Rename 局部变量完善** | P1 | apply 块内局部变量重命名 | ✅ 完成 |
 | **Semantic Tokens 修复** | P1 | 消除 token 重叠/长度警告 | token 映射规则校对 |
 | **Signature Help 完善** | P1 | extern method 签名正确返回 | hover.rs 签名库扩展 |
-| **#include 配置链路** | P1 | `includePaths` 从 VS Code 配置下发到 server | workspace/configuration 请求 |
+| **#include 配置链路** | P1 | `includePaths` 从 VS Code 配置下发到 server | ✅ 完成 |
 
 ## Phase 2: 语义深度（中期）
 

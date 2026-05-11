@@ -15,9 +15,9 @@
 | **Completion** | ✅ | 局部作用域符号、类型推导字段/方法、P4 内置库（`isValid`/`setInvalid`、`extract`、`emit` 等） |
 | **Document Symbols** | ✅ | 当前文件大纲（Outline 视图） |
 | **Diagnostics** | ✅ | 语法错误（tree-sitter）+ 语义诊断（未定义引用检测、重复定义检测） |
-| **Workspace Symbol** | ⏸️ | 能力已注册，实现为 stub，待接入全局索引 |
-| **Find References** | ⚠️ | 单文件内实现完成；跨文件引用待扩展 |
-| **Rename** | ⚠️ | 基础实现完成；apply 块内局部变量重命名待完善 |
+| **Workspace Symbol** | ✅ | 全局符号搜索（Ctrl+T），遍历所有已索引文件 |
+| **Find References** | ✅ | 单文件 + 跨文件全局索引遍历 |
+| **Rename** | ✅ | 基础实现 + apply 块局部变量 + action 边界隔离 + 跨文件 |
 | **Signature Help** | ⚠️ | handler 已实现，call 节点识别 + 参数索引计算完成；extern method 签名接入待完善 |
 | **Semantic Tokens** | ⚠️ | 基本实现完成；token 重叠/长度警告待修复 |
 | **Code Action** | ❌ | 未实现 |
@@ -50,7 +50,7 @@
 | **全局索引 (DashMap)** | ✅ | 声明提取 + 作用域收集 |
 | **作用域查询 (scope_at)** | ✅ | action 参数、局部变量、for 循环变量、shadowing 支持 |
 | **类型推导 (typer)** | ✅ | 表达式类型推断、嵌套字段类型解析 |
-| **#include 解析** | ⚠️ | 预扫描已覆盖同目录 `.p4`；`includePaths` 配置链路待打通 |
+| **#include 解析** | ✅ | 配置链路完整（客户端下发 → 服务端接收存储） |
 | **跨文件类型解析** | ⚠️ | 预索引完成后大部分场景可用；复杂嵌套场景待增强 |
 | **常量传播/折叠** | ❌ | 未实现 |
 | **数组边界检查** | ❌ | 未实现 |
